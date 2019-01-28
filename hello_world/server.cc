@@ -3,8 +3,18 @@
 erpc::Rpc<erpc::CTransport> *rpc;
 
 void req_handler(erpc::ReqHandle *req_handle, void *) {
-  auto &resp = req_handle->pre_resp_msgbuf;
-  rpc->resize_msg_buffer(&resp, 16);
+  // The two options below show how to use the preallocated response msgbuf,
+  // or the dynamic response msgbuf.
+
+  // Option 1:
+  // auto &resp = req_handle->pre_resp_msgbuf;
+  // rpc->resize_msg_buffer(&resp, 16);
+  // End option 1
+
+  // Option 2
+  auto &resp = req_handle->dyn_resp_msgbuf;
+  resp = rpc->alloc_msg_buffer(16);
+  // End option 2
 
   assert(resp.get_data_size() == 16);
 
