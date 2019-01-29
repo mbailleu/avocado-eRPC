@@ -11,7 +11,7 @@ void cont_func(void *, void *) {
   // byte to 'q', but the client does not receive that byte.
   for (size_t i = 0; i <= 16400; i++) {
     printf("%zu: %c\n", i, resp.buf[i]);
-    if (i < 16) assert(resp.buf[i] == 'p');
+    if (i < 16400) assert(resp.buf[i] == 'p');
   }
   printf("\n");
 }
