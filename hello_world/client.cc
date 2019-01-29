@@ -5,11 +5,11 @@ erpc::MsgBuffer req;
 erpc::MsgBuffer resp;
 
 void cont_func(void *, void *) {
-  assert(resp.get_data_size() == 16);
+  assert(resp.get_data_size() == 16400);
 
   // The response has its first 16 bytes set to 'p'. The server sets the 17th
   // byte to 'q', but the client does not receive that byte.
-  for (size_t i = 0; i <= 16; i++) {
+  for (size_t i = 0; i <= 16400; i++) {
     printf("%zu: %c\n", i, resp.buf[i]);
     if (i < 16) assert(resp.buf[i] == 'p');
   }

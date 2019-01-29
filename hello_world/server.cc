@@ -13,13 +13,12 @@ void req_handler(erpc::ReqHandle *req_handle, void *) {
 
   // Option 2
   auto &resp = req_handle->dyn_resp_msgbuf;
-  resp = rpc->alloc_msg_buffer(16);
+  resp = rpc->alloc_msg_buffer(16400);
   // End option 2
 
-  assert(resp.get_data_size() == 16);
+  assert(resp.get_data_size() == 16400);
 
-  memset(resp.buf, 'p', 16);  // Client will see first 16 B of response = 'p'
-  resp.buf[16] = 'q';         // Client won't see this byte
+  memset(resp.buf, 'p', 16400);  // Client will see first 16 B of response = 'p'
   rpc->enqueue_response(req_handle, &resp);
 }
 
