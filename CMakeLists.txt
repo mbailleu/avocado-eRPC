@@ -7,11 +7,11 @@ include(CMakeDependentOption)
 #set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER g++)
 
-add_definitions(-std=c++11 -march=native -g)
-add_definitions(-Wall -Wextra -Werror -pedantic -Wsign-conversion -Wold-style-cast)
+add_definitions(-std=c++17 -march=native -g)
+add_definitions(-Wall -Wextra -pedantic)
 add_definitions(-Wno-unused-function -Wno-nested-anon-types -Wno-keyword-macro)
 
-set(LIBRARIES ${LIBRARIES} rt numa pthread gflags)
+set(LIBRARIES ${LIBRARIES} rt numa pthread gflags hugetlbfs)
 
 # Unit tests
 enable_testing()
@@ -120,6 +120,7 @@ else(LTO)
 endif(LTO)
 
 set(SOURCES
+  src/cc/common.cc
   src/nexus_impl/nexus.cc
   src/nexus_impl/nexus_bg_thread.cc
   src/nexus_impl/nexus_sm_thread.cc
@@ -185,6 +186,9 @@ else()
 endif()
 
 configure_file(src/config.h.in src/config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 
 # MICA sources
 set(MICA_SOURCES
@@ -234,6 +238,8 @@ if(COMPILE_ERPC_LIB)
   message(STATUS "Compiling eRPC as a library")
   add_library(erpc ${SOURCES})
 endif()
+
+message(${GTEST_LIBRARY})
 
 # Compile the tests
 if(TESTING)

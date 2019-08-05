@@ -41,7 +41,7 @@ static constexpr bool kTesting = ERPC_TESTING;
 /// Array size to hold registered request handler functions
 static constexpr size_t kReqTypeArraySize = 1ull + UINT8_MAX;
 
-static constexpr size_t kHugepageSize = (2 * 1024 * 1024);  ///< Hugepage size
+extern const size_t kHugepageSize;  ///< Hugepage size
 static constexpr size_t kMaxHostnameLen = 128;  ///< Max hostname length
 static constexpr size_t kMaxIssueMsgLen =  ///< Max debug issue message length
     (240 + kMaxHostnameLen * 2);           // Three lines and two hostnames

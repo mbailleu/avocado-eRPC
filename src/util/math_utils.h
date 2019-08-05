@@ -23,6 +23,12 @@ static constexpr inline T round_up(T x) {
   return ((x) + T(power_of_two_number - 1)) & (~T(power_of_two_number - 1));
 }
 
+template<class T1, class T2>
+static inline T2 round_up(T1 const & power_of_two, T2 const & x) {
+    assert(is_power_of_two(power_of_two));
+    return ((x) + T2(power_of_two - 1)) & (~T2(power_of_two - 1));
+}
+
 /// Return the index of the least significant bit of x. The index of the 2^0
 /// bit is 1. (x = 0 returns 0, x = 1 returns 1.)
 static inline size_t lsb_index(int x) {

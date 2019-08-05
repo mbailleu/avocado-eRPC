@@ -3,7 +3,7 @@
 #   * If DTRANSPORT=dpdk, use `make dpdk`
 #   * If DTRANSPORT=raw, use `make raw`
 #   * If DTRANSPORT=infiniband, use `make infiniband`
-LIBS = -lerpc -lpthread -lnuma -ldl
+LIBS = -lerpc -lpthread -lnuma -ldl -lhugetlbfs
 
 error:
 	@echo "Please choose one of the following targets: infiniband, raw, dpdk, clean"
@@ -17,6 +17,7 @@ raw:
 dpdk:
 	g++ -g -std=c++11 -o server server.cc -I ../src -I /usr/local/include/dpdk -L ../build $(LIBS) -ldpdk -DERPC_DPDK=true -march=native
 	g++ -g -std=c++11 -o client client.cc -I ../src -I /usr/local/include/dpdk -L ../build $(LIBS) -ldpdk -DERPC_DPDK=true -march=native
+
 clean:
 	rm server client
 

@@ -61,7 +61,7 @@ void HugeAlloc::print_stats() {
 
 Buffer HugeAlloc::alloc_raw(size_t size, DoRegister do_register) {
   std::ostringstream xmsg;  // The exception message
-  size = round_up<kHugepageSize>(size);
+  size = round_up(kHugepageSize, size);
   int shm_key, shm_id;
 
   while (true) {
