@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
+#if 0
 namespace testing {
 namespace internal {
 enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
@@ -11,6 +12,7 @@ extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
 }  // namespace internal
 }  // namespace testing
 
+#endif
 #define test_printf(...)                                                    \
   do {                                                                      \
     testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN,        \
