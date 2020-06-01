@@ -41,12 +41,14 @@ TEST(HugeAllocTest, PageAllocPerf) {
   struct timespec start, end;
   clock_gettime(CLOCK_REALTIME, &start);
 
+  auto i = 1U;
   while (true) {
     erpc::Buffer buffer = alloc->alloc(KB(4));
     if (buffer.buf == nullptr) break;
 
     num_pages_allocated++;
   }
+  test_printf("num_pages_allocated: %llu\n", num_pages_allocated);
 
   clock_gettime(CLOCK_REALTIME, &end);
   double nanoseconds =

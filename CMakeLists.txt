@@ -6,23 +6,24 @@ include(CMakeDependentOption)
 # Pick a compiler
 #set(CMAKE_CXX_COMPILER clang++)
 set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
 
 add_definitions(-std=c++17 -march=native -g)
 add_definitions(-Wall -Wextra -pedantic)
 add_definitions(-Wno-unused-function -Wno-nested-anon-types -Wno-keyword-macro)
 
-set(LIBRARIES ${LIBRARIES} rt numa pthread gflags hugetlbfs)
+set(LIBRARIES ${LIBRARIES} rt numa pthread gflags)
 
 # Unit tests
 enable_testing()
-find_package(GTest REQUIRED)
+#find_package(GTest REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/third_party)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
 
 # liberpc will be compiled unless profile-guided optimization or LTO is enabled
 set(COMPILE_ERPC_LIB ON)
@@ -47,7 +48,8 @@ if(PERF)
 else(PERF)
   message(STATUS "Compilation not optimized for performance.")
   set(DEBUG ON)
-  set(TESTING ON)
+  #  set(TESTING ON)
+  set(TESTING OFF)
 endif(PERF)
 
 # Profile-guided optimization
@@ -94,6 +96,8 @@ endif()
 # Debug mode
 if(DEBUG)
   message(STATUS "Debugging is enabled. Perf will be low.")
+  add_definitions(-O0)
+  add_definitions(-g)
 else(DEBUG)
   message(STATUS "Debugging is disabled.")
   add_definitions(-DNDEBUG)
@@ -120,7 +124,6 @@ else(LTO)
 endif(LTO)
 
 set(SOURCES
-  src/cc/common.cc
   src/nexus_impl/nexus.cc
   src/nexus_impl/nexus_bg_thread.cc
   src/nexus_impl/nexus_sm_thread.cc
@@ -149,7 +152,9 @@ set(SOURCES
   src/transport_impl/raw/raw_transport_datapath.cc
   src/util/huge_alloc.cc
   src/util/externs.cc
-  src/util/tls_registry.cc)
+  src/util/tls_registry.cc
+  src/cc/common.cc
+  )
 
 # Transport-specific. Mellanox OFED drivers are the best choice for raw and
 # infiniband, but they do not play well with DPDK. So we compile only one
@@ -221,6 +226,7 @@ if(TRANSPORT STREQUAL "raw")
     raw_transport_test)
 endif()
 
+
 # These are not run using ctest
 set(UTIL_TESTS
   huge_alloc_test
@@ -239,19 +245,24 @@ if(COMPILE_ERPC_LIB)
   add_library(erpc ${SOURCES})
 endif()
 
-message(${GTEST_LIBRARY})
+# message(${GTEST_LIBRARY})
 
 # Compile the tests
 if(TESTING)
+
+  if(TRANSPORT STREQUAL "dpdk")
+    set(ADD_LIBRARIES -ldpdk -ldl)
+  endif()
+
   foreach(test_name IN LISTS CLIENT_TESTS)
     add_executable(${test_name} tests/client_tests/${test_name}.cc)
-    target_link_libraries(${test_name} erpc ${GTEST_LIBRARIES} ${LIBRARIES})
+    target_link_libraries(${test_name} -Wl,--whole-archive erpc ${GTEST_LIBRARIES} ${LIBRARIES} -Wl,--no-whole-archive ${ADD_LIBRARIES})
     add_test(NAME ${test_name} COMMAND ${test_name})
   endforeach()
 
   foreach(test_name IN LISTS PROTOCOL_TESTS)
     add_executable(${test_name} tests/protocol_tests/${test_name}.cc)
-    target_link_libraries(${test_name} erpc ${GTEST_LIBRARIES} ${LIBRARIES})
+    target_link_libraries(${test_name} erpc ${GTEST_LIBRARIES} ${LIBRARIES} ${ADD_LIBRARIES})
     add_test(NAME ${test_name} COMMAND ${test_name})
   endforeach()
 
