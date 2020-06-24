@@ -116,9 +116,6 @@ Buffer HugeAlloc::alloc_raw(size_t size, DoRegister do_register) {
 
   // Bind the buffer to the NUMA node
   const unsigned long nodemask = (1ul << static_cast<unsigned long>(numa_node));
-  long ret = mbind(shm_buf, size, MPOL_BIND, &nodemask, 32, 0);
-  rt_assert(ret == 0,
-            "eRPC HugeAlloc: mbind() failed. Key " + std::to_string(shm_key));
 
   // If we are here, the allocation succeeded.  Register if needed.
   bool do_register_bool = (do_register == DoRegister::kTrue);
