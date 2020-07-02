@@ -153,12 +153,14 @@ Buffer HugeAlloc::alloc(size_t size) {
       // more hugepages. This adds some Buffers to the largest class.
       prev_allocation_size *= 2;
       bool success = reserve_hugepages(prev_allocation_size);
-      if (!success) {
-        prev_allocation_size /= 2;  // Restore the previous allocation
-        return Buffer(nullptr, 0, 0);
-      } else {
-        next_class = kNumClasses - 1;
+      while (!success) {
+        prev_allocation_size /= 2; // Restore the previous allocation
+        if (prev_allocation_size < kMaxClassSize) {
+          return Buffer(nullptr, 0, 0);
+        }
+        success = reserve_hugepages(prev_allocation_size);
       }
+      next_class = kNumClasses - 1;
     }
 
     // If we're here, \p next_class has free Buffers
