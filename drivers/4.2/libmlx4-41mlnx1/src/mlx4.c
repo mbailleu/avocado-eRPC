@@ -52,6 +52,8 @@
 #include "mlx4-abi.h"
 #include "mlx4_exp.h"
 
+#include "scone.h"
+
 
 #ifndef PCI_VENDOR_ID_MELLANOX
 #define PCI_VENDOR_ID_MELLANOX			0x15b3
@@ -541,13 +543,13 @@ static int mlx4_init_context(struct verbs_device *v_device,
 	mlx4_init_xsrq_table(&context->xsrq_table, qp_tab_size);
 	pthread_mutex_init(&context->db_list_mutex, NULL);
 
-	context->uar = mmap(NULL, dev->page_size, PROT_WRITE,
+	context->uar = scone_kernel_mmap(NULL, dev->page_size, PROT_WRITE,
 			    MAP_SHARED, cmd_fd, 0);
 	if (context->uar == MAP_FAILED)
 		return errno;
 
 	if (bf_reg_size) {
-		context->bfs.page = mmap(NULL, dev->page_size,
+		context->bfs.page = scone_kernel_mmap(NULL, dev->page_size,
 					 PROT_WRITE, MAP_SHARED, cmd_fd,
 					 dev->page_size);
 		if (context->bfs.page == MAP_FAILED) {
@@ -624,7 +626,7 @@ static int mlx4_init_context(struct verbs_device *v_device,
 			  &hca_clock_offset) >= 0) {
 			VALGRIND_MAKE_MEM_DEFINED(&hca_clock_offset, sizeof(hca_clock_offset));
 			context->core_clk.offset = hca_clock_offset;
-			hca_clock_page = mmap(NULL, hca_clock_offset +
+			hca_clock_page = scone_kernel_mmap(NULL, hca_clock_offset +
 					sizeof(context->core_clk.mask),
 					PROT_READ, MAP_SHARED, cmd_fd,
 					dev->page_size *

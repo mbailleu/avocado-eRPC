@@ -53,6 +53,7 @@
 #include "mlx4-abi.h"
 #include "mlx4_exp.h"
 #include "wqe.h"
+#include "scone.h"
 
 #define SHARED_MR_PROC_DIR_NAME "/proc/driver/mlx4_ib/mrs"
 #define FPATH_MAX 128
@@ -380,7 +381,7 @@ struct ibv_mr *mlx4_reg_shared_mr(struct ibv_exp_reg_shared_mr_in *in)
 	/* set protection based on access flags input address may be NULL
 	     or other recommended address by the application.
 	*/
-	addr = mmap(addr , total_size,
+	addr = scone_kernel_mmap(addr , total_size,
 		    is_writeable_mr ? (PROT_WRITE | PROT_READ) :
 				PROT_READ, MAP_SHARED,
 				fd,

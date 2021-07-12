@@ -28,6 +28,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include "scone.h"
+
 using lcdf::String;
 
 kvepoch_t global_log_epoch;
@@ -402,7 +404,7 @@ logreplay::logreplay(const String &filename)
     if (size_ != 0) {
         // XXX what if filename_ is too big to mmap in its entirety?
         // XXX should support mmaping/writing in pieces
-        buf_ = (char *) ::mmap(0, size_, PROT_READ, MAP_FILE | MAP_PRIVATE,
+        buf_ = (char *) scone_kernel_mmap(0, size_, PROT_READ, MAP_FILE | MAP_PRIVATE,
                                fd, 0);
         if (buf_ == MAP_FAILED)
             goto fail;

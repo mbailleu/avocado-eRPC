@@ -63,6 +63,8 @@
 #include "msgpack.hh"
 #include <algorithm>
 #include <deque>
+#include "scone.h"
+
 using lcdf::StringAccum;
 
 enum { CKState_Quit, CKState_Uninit, CKState_Ready, CKState_Go };
@@ -1283,7 +1285,7 @@ kvepoch_t read_checkpoint(threadinfo *ti, const char *path) {
     struct stat sb;
     int ret = fstat(fd, &sb);
     always_assert(ret == 0);
-    char *p = (char *) mmap(0, sb.st_size, PROT_READ, MAP_FILE|MAP_PRIVATE, fd, 0);
+    char *p = (char *) scone_kernel_mmap(0, sb.st_size, PROT_READ, MAP_FILE|MAP_PRIVATE, fd, 0);
     always_assert(p != MAP_FAILED);
     close(fd);
 

@@ -31,6 +31,7 @@ static void nano_sleep(size_t ns, double freq_ghz) {
 }
 
 static double measure_rdtsc_freq() {
+#if 0
   struct timespec start, end;
   clock_gettime(CLOCK_REALTIME, &start);
   uint64_t rdtsc_start = rdtsc();
@@ -50,7 +51,9 @@ static double measure_rdtsc_freq() {
   uint64_t rdtsc_cycles = rdtsc() - rdtsc_start;
 
   double _freq_ghz = rdtsc_cycles * 1.0 / clock_ns;
-  rt_assert(_freq_ghz >= 0.5 && _freq_ghz <= 5.0, "Invalid RDTSC frequency");
+#endif
+  double _freq_ghz = 3.6; //FIXME
+  rt_assert(_freq_ghz >= 0.5 && _freq_ghz <= 5.0, "Invalid RDTSC frequency"); 
 
   return _freq_ghz;
 }

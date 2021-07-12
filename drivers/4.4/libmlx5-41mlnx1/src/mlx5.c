@@ -45,6 +45,8 @@
 #include <sched.h>
 #include <sys/param.h>
 
+#include "scone.h"
+
 #ifndef HAVE_IBV_REGISTER_DRIVER
 #include <sysfs/libsysfs.h>
 #endif
@@ -708,7 +710,7 @@ void *mlx5_uar_mmap(int idx, int cmd, int page_size, int cmd_fd)
 	set_command(cmd, &offset);
 	set_index(idx, &offset);
 
-	return mmap(NULL, page_size, PROT_WRITE, MAP_SHARED, cmd_fd, page_size * offset);
+	return scone_kernel_mmap(NULL, page_size, PROT_WRITE, MAP_SHARED, cmd_fd, page_size * offset);
 }
 
 void read_init_vars(struct mlx5_context *ctx)
@@ -737,7 +739,7 @@ static void mlx5_map_internal_clock(struct mlx5_device *mdev,
 	off_t offset = 0;
 
 	set_command(MLX5_EXP_MMAP_GET_CORE_CLOCK_CMD, &offset);
-	hca_clock_page = mmap(NULL, mdev->page_size,
+	hca_clock_page = scone_kernel_mmap(NULL, mdev->page_size,
 			      PROT_READ, MAP_SHARED, ibv_ctx->cmd_fd,
 			      offset * mdev->page_size);
 
@@ -759,7 +761,7 @@ static void mlx5_map_clock_info(struct mlx5_device *mdev,
 
 	set_command(MLX5_EXP_IB_MMAP_CLOCK_INFO_CMD, &offset);
 	set_index(MLX5_EXP_CLOCK_INFO_V1, &offset);
-	clock_info_page = mmap(NULL, mdev->page_size,
+	clock_info_page = scone_kernel_mmap(NULL, mdev->page_size,
 			       PROT_READ, MAP_SHARED, ibv_ctx->cmd_fd,
 			       offset * mdev->page_size);
 	if (clock_info_page != MAP_FAILED)
@@ -1089,7 +1091,7 @@ static int mlx5_alloc_context(struct verbs_device *vdev,
 
 	offset = 0;
 	set_command(MLX5_MMAP_MAP_DC_INFO_PAGE, &offset);
-	context->cc.buf = mmap(NULL, 4096 * context->num_ports, PROT_READ,
+	context->cc.buf = scone_kernel_mmap(NULL, 4096 * context->num_ports, PROT_READ,
 			       MAP_PRIVATE, cmd_fd, page_size * offset);
 	if (context->cc.buf == MAP_FAILED)
 		context->cc.buf = NULL;

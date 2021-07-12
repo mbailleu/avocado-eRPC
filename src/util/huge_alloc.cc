@@ -1,6 +1,12 @@
 #include "huge_alloc.h"
 #include <iostream>
+#include <sstream>
+#include <string>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include "util/logger.h"
+
+#include "scone.h"
 
 namespace erpc {
 
@@ -62,7 +68,9 @@ void HugeAlloc::print_stats() {
 Buffer HugeAlloc::alloc_raw(size_t size, DoRegister do_register) {
   std::ostringstream xmsg;  // The exception message
   size = round_up(kHugepageSize, size);
+#if 0
   int shm_key, shm_id;
+  std::string file;
 
   while (true) {
     // Choose a positive SHM key. Negative is fine but it looks scary in the
@@ -70,8 +78,13 @@ Buffer HugeAlloc::alloc_raw(size_t size, DoRegister do_register) {
     shm_key = static_cast<int>(slow_rand.next_u64());
     shm_key = std::abs(shm_key);
 
+    std::stringstream name;
+    name << "this_is_stupid_" << shm_key;
+    file = name.str();
+    shm_id = open(file.c_str(), O_CREAT | O_RDWR, 0666);
     // Try to get an SHM region
-    shm_id = shmget(shm_key, size, IPC_CREAT | IPC_EXCL | 0666 | SHM_HUGETLB);
+    //shm_id = shmget(shm_key, size, IPC_CREAT | IPC_EXCL | 0666 | SHM_HUGETLB);
+
 
     if (shm_id == -1) {
       switch (errno) {
@@ -107,13 +120,19 @@ Buffer HugeAlloc::alloc_raw(size_t size, DoRegister do_register) {
     }
   }
 
-  uint8_t *shm_buf = static_cast<uint8_t *>(shmat(shm_id, nullptr, 0));
+  uint8_t *shm_buf = static_cast<uint8_t *>(mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_id, 0));
   rt_assert(shm_buf != nullptr,
             "eRPC HugeAlloc: shmat() failed. Key = " + std::to_string(shm_key));
-
+  close(shm_id);
+  remove(file.c_str());
   // Mark the SHM region for deletion when this process exits
-  shmctl(shm_id, IPC_RMID, nullptr);
-
+  //shmctl(shm_id, IPC_RMID, nullptr);
+#endif
+  auto mem = open("/dev/zero", O_RDWR);
+  if (mem == -1) {
+    rt_assert("FUCK YOU!!");
+  }
+  auto shm_buf = static_cast<uint8_t *>(scone_kernel_mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE, mem, 0));
   // Bind the buffer to the NUMA node
   const unsigned long nodemask = (1ul << static_cast<unsigned long>(numa_node));
 
@@ -123,9 +142,9 @@ Buffer HugeAlloc::alloc_raw(size_t size, DoRegister do_register) {
   if (do_register_bool) reg_info = reg_mr_func(shm_buf, size);
 
   // Save the SHM region so we can free it later
-  shm_list.push_back(
-      shm_region_t(shm_key, shm_buf, size, do_register_bool, reg_info));
-  stats.shm_reserved += size;
+//shm_list.push_back(
+//      shm_region_t(shm_key, shm_buf, size, do_register_bool, reg_info));
+ // stats.shm_reserved += size;
 
   // buffer.class_size is invalid because we didn't allocate from a class
   return Buffer(shm_buf, SIZE_MAX,

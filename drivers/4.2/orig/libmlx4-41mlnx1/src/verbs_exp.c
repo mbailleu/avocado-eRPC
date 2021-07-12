@@ -50,6 +50,7 @@
 #include "mlx4-abi.h"
 #include "mlx4_exp.h"
 #include "wqe.h"
+#include "scone.h"
 
 static const char *qptype2key(enum ibv_qp_type type)
 {
@@ -808,13 +809,13 @@ static struct mlx4_send_db_data *allocate_send_db(struct mlx4_context *ctx)
 		ctx->send_db_num_uars++;
 		mlx4_spin_unlock(&ctx->send_db_lock);
 
-		uar = mmap(NULL, dev->page_size, PROT_WRITE, MAP_SHARED,
+		uar = scone_kernel_mmap(NULL, dev->page_size, PROT_WRITE, MAP_SHARED,
 			   ctx->ibv_ctx.cmd_fd,
 			   dev->page_size * (MLX4_IB_EXP_MMAP_EXT_UAR_PAGE |
 					     (uar_idx << MLX4_MMAP_CMD_BITS)));
 		if (uar == MAP_FAILED)
 			return NULL;
-		bfs = mmap(NULL, dev->page_size, PROT_WRITE, MAP_SHARED,
+		bfs = scone_kernel_mmap(NULL, dev->page_size, PROT_WRITE, MAP_SHARED,
 			   ctx->ibv_ctx.cmd_fd,
 			   dev->page_size * (MLX4_IB_EXP_MMAP_EXT_BLUE_FLAME_PAGE |
 					     (uar_idx << MLX4_MMAP_CMD_BITS)));

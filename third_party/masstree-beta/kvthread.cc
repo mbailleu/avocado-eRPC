@@ -29,6 +29,8 @@ threadinfo *threadinfo::allthreads;
 int threadinfo::no_pool_value;
 #endif
 
+#include "scone.h"
+
 inline threadinfo::threadinfo(int purpose, int index) {
     memset(this, 0, sizeof(*this));
     purpose_ = purpose;
@@ -209,7 +211,7 @@ void threadinfo::refill_pool(int nl) {
     if (superpage_size != (size_t) -1) {
         pool_size = superpage_size;
 # if MAP_HUGETLB
-        pool = mmap(0, pool_size, PROT_READ | PROT_WRITE,
+        pool = scone_kernel_mmap(0, pool_size, PROT_READ | PROT_WRITE,
                     MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_POPULATE, -1, 0);
         if (pool == MAP_FAILED) {
             perror("mmap superpage");

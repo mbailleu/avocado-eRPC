@@ -51,6 +51,8 @@
 #include "mlx5-abi.h"
 #include "wqe.h"
 
+#include "scone.h"
+
 int mlx5_single_threaded = 0;
 int mlx5_use_mutex;
 
@@ -744,7 +746,7 @@ struct ibv_exp_dm *mlx5_exp_alloc_dm(struct ibv_context *context,
 	}
 
 	act_size = align(dm_attr->length, page_size);
-	start_addr = mmap(NULL, act_size, PROT_READ | PROT_WRITE,
+	start_addr = scone_kernel_mmap(NULL, act_size, PROT_READ | PROT_WRITE,
 			  MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
 	if (start_addr == MAP_FAILED) {

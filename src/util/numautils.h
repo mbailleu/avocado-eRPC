@@ -32,6 +32,7 @@ static std::vector<size_t> get_lcores_for_numa_node(size_t numa_node) {
 /// Bind \p thread to core with index \p numa_local_index on \p numa_node
 static void bind_to_core(std::thread &thread, size_t numa_node,
                          size_t numa_local_index) {
+#if 0
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   rt_assert(numa_node <= kMaxNumaNodes, "Invalid NUMA node");
@@ -43,6 +44,7 @@ static void bind_to_core(std::thread &thread, size_t numa_node,
   int rc = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t),
                                   &cpuset);
   rt_assert(rc == 0, "Error setting thread affinity");
+#endif
 }
 
 }  // namespace erpc

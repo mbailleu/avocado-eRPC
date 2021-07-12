@@ -49,6 +49,8 @@
 #include "mlx5.h"
 #include "bitmap.h"
 
+#include "scone.h"
+
 #if !(defined(HAVE_IBV_DONTFORK_RANGE) && defined(HAVE_IBV_DOFORK_RANGE))
 
 /*
@@ -603,7 +605,7 @@ int mlx5_alloc_buf_contig(struct mlx5_context *mctx,
 			set_command(MLX5_MMAP_GET_CONTIGUOUS_PAGES_CMD, &offset);
 
 		set_order(block_size_exp, &offset);
-		addr = mmap(act_addr, act_size, PROT_WRITE | PROT_READ, mmap_flags,
+		addr = scone_kernel_mmap(act_addr, act_size, PROT_WRITE | PROT_READ, mmap_flags,
 			    context->cmd_fd, page_size * offset);
 
 		/* If CONTIGUOUS_PAGES_DEV_NUMA_CMD fails try CONTIGUOUS_PAGES */
@@ -611,7 +613,7 @@ int mlx5_alloc_buf_contig(struct mlx5_context *mctx,
 		    get_command(&offset) != MLX5_MMAP_GET_CONTIGUOUS_PAGES_CMD) {
 			reset_command(&offset);
 			set_command(MLX5_MMAP_GET_CONTIGUOUS_PAGES_CMD, &offset);
-			addr = mmap(act_addr, act_size, PROT_WRITE | PROT_READ, mmap_flags,
+			addr = scone_kernel_mmap(act_addr, act_size, PROT_WRITE | PROT_READ, mmap_flags,
 				    context->cmd_fd, page_size * offset);
 		}
 		if (addr != MAP_FAILED)
@@ -707,7 +709,7 @@ int mlx5_alloc_buf(struct mlx5_buf *buf, size_t size, int page_size)
 		buf->numa_alloc = 1;
 	} else {
 		buf->numa_alloc = 0;
-		buf->buf = mmap(NULL, al_size, PROT_READ | PROT_WRITE,
+		buf->buf = scone_kernel_mmap(NULL, al_size, PROT_READ | PROT_WRITE,
 				MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 		if (buf->buf == MAP_FAILED)
 			return errno;

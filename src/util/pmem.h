@@ -15,6 +15,7 @@
 #include <string>
 #include "common.h"
 #include "math_utils.h"
+#include "scone.h"
 
 namespace erpc {
 
@@ -24,7 +25,7 @@ uint8_t* map_devdax_file(std::string devdax_file, size_t bytes) {
 
   size_t pmem_size = round_up<MB(2)>(bytes);  // Smaller sizes may fail
   void* buf =
-      mmap(nullptr, pmem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+      scone_kernel_mmap(nullptr, pmem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   rt_assert(buf != MAP_FAILED, "Failed to mmap devdax file" + devdax_file);
   rt_assert(reinterpret_cast<size_t>(buf) % 256 == 0);
   memset(buf, 0, pmem_size);

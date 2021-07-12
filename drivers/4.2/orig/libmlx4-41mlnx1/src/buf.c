@@ -45,6 +45,8 @@
 #include "mlx4.h"
 #include "bitmap.h"
 
+#include "scone.h"
+
 struct mlx4_hugetlb_mem {
 	int			shmid;
 	char		       *shmaddr;
@@ -213,7 +215,7 @@ int mlx4_alloc_buf(struct mlx4_buf *buf, size_t size, int page_size)
 	int ret;
 
 	buf->length = align(size, page_size);
-	buf->buf = mmap(NULL, buf->length, PROT_READ | PROT_WRITE,
+	buf->buf = scone_kernel_mmap(NULL, buf->length, PROT_READ | PROT_WRITE,
 			MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	if (buf->buf == MAP_FAILED)
 		return errno;
@@ -398,7 +400,7 @@ int mlx4_alloc_buf_contig(struct mlx4_context *mctx,
 			use the last 3 bits of the offset parameter
 			as the command identifier.
 		*/
-		addr = mmap(act_addr, act_size,
+		addr = scone_kernel_mmap(act_addr, act_size,
 				PROT_WRITE | PROT_READ, mmap_flags,
 				context->cmd_fd,
 				page_size *
