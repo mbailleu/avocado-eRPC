@@ -18,12 +18,12 @@ set(LIBRARIES ${LIBRARIES} rt numa pthread gflags)
 enable_testing()
 #find_package(GTest REQUIRED)
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/third_party)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(SYSTEM ${CMAKE_CURRENT_SOURCE_DIR}/third_party)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build)
 
 # liberpc will be compiled unless profile-guided optimization or LTO is enabled
 set(COMPILE_ERPC_LIB ON)
